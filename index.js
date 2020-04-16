@@ -2,12 +2,14 @@
 const express = require('express');
 const  logger = require('./middleware/logger.js')
 const userRouter = require('./users/userRouter.js');
+const postRouter = require('./posts/postRouter.js');
 
 const server = express();
 
 server.use(express.json());
 const port = 9090;
 server.use('/api/users/',userRouter);
+server.use('/api/posts/',postRouter);
 server.use(logger({format : "long"}))
 
 server.use((req, res) => {

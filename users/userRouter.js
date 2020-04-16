@@ -5,7 +5,7 @@ const postDB = require('../posts/postDb.js')
 const router = express.Router();
 
 // Create New User
-router.post('/', validateUser(), (req, res) => {  
+router.post('/', validateUser(), (req, res, next) => {  
         
     userDB.insert(req.body) 
       .then((user) => {
@@ -19,7 +19,7 @@ router.post('/', validateUser(), (req, res) => {
 
 
 // Create New Post By User ID
-router.post('/:id/posts', validatePost(), validateUserId() ,(req, res) => {
+router.post('/:id/posts', validatePost(), validateUserId() ,(req, res, next) => {
   
      const user_id = req.params.id 
     // const { text } = req.body;
@@ -39,7 +39,7 @@ router.post('/:id/posts', validatePost(), validateUserId() ,(req, res) => {
 
 
 // Get Users
-router.get('/', (req, res) => {
+router.get('/', (req, res, next) => {
     
     userDB.get()
       .then((users) => {
@@ -57,7 +57,7 @@ router.get('/:id', validateUser(), (req, res) => {
 });
 
 // Get User Posts By User ID
-router.get('/:id/posts', validateUserId(), (req, res) => {
+router.get('/:id/posts', validateUserId(), (req, res, next) => {
   
     userDB.getUserPosts(req.params.id)
       .then((posts) => {
@@ -71,7 +71,7 @@ router.get('/:id/posts', validateUserId(), (req, res) => {
 
 
 // Delete User By ID
-router.delete('/:id', (req, res) => {
+router.delete('/:id', (req, res, next) => {
   
     userDB.remove(req.params.id)
       .then((users) => {
@@ -85,7 +85,7 @@ router.delete('/:id', (req, res) => {
 
 
 // Update User By ID
-router.put('/:id', validateUser(), validateUserId(), (req, res) => {
+router.put('/:id', validateUser(), validateUserId(), (req, res, next) => {
  
     userDB.update(req.params.id,req.body)
       .then((user) => {
@@ -107,12 +107,16 @@ function validateUserId(req, res, next) {
 
       userDB.getById(req.params.id)
         .then((user) => {
+          
           if(user) {
+
               req.user = user
               next()
+
           } else {
-            res.status(404).json({message: "The user with the specified ID does not exist"})
-            res.json(user); 
+             
+             res.status(404).json({message: "invalid user id"})
+             res.json(user); 
           }
           
         })
@@ -128,11 +132,19 @@ function validateUserId(req, res, next) {
 function validateUser(req, res, next) {
 
     return (req, res, next) => {
+       
+        if(req.body.constructor === Object && Object.keys(req.body).length === 0) {
 
-        if(!req.body.name) {
-          res.status(400).json({
-            message: "Please provide name for the user."
-          })
+            res.status(400).json({
+              message: "missing user data"
+            })
+
+        } else if(!req.body.name) {
+           
+            res.status(400).json({
+              message: "missing required name field"
+            })
+
         } else {
           next()
         }
@@ -142,11 +154,20 @@ function validateUser(req, res, next) {
 function validatePost(req, res, next) {
     
      return (req, res, next) => {
-         
-        if(!req.body.text) {
+        
+        if(req.body.constructor === Object && Object.keys(req.body).length === 0) {
+       
           res.status(400).json({
-            message: "Please provide name for the post."
+            message: "missing post data"
           })
+             
+          
+        } else if(!req.body.text) {
+
+            res.status(400).json({
+            message: "missing required text field"
+            })
+
         } else {
           next()
         }
