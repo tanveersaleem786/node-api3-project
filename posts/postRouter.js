@@ -41,6 +41,7 @@ router.delete('/:id', validatePostId(), (req, res, next) => {
 // Update Post By ID
 router.put('/:id',validatePost(), validatePostId(), (req, res, next) => {
     
+    console.log(req.params.id+'=========='+req.body.text);
     postDB.update(req.params.id,req.body.text)
       .then((post) => {
         res.status(200).json(post)

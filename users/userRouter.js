@@ -52,7 +52,7 @@ router.get('/', (req, res, next) => {
 });
 
 // Get User By ID
-router.get('/:id', validateUser(), (req, res) => {    
+router.get('/:id', validateUserId(), (req, res) => {    
     res.status(200).json(req.user)    
 });
 
